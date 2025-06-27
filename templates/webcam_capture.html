@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-primary: #00fff7;
+            --neon-secondary: #ff00c8;
+            --bg-dark: #0f0f0f;
+            --bg-darker: #050505;
+            --text-glow: 0 0 8px currentColor;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--bg-dark), var(--bg-darker));
+            color: var(--neon-primary);
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        h1 {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            margin-bottom: 2rem;
+            text-shadow: var(--text-glow);
+            font-weight: 500;
+        }
+        
+        .camera-container {
+            background: rgba(10, 10, 10, 0.5);
+            border: 1px solid rgba(0, 255, 247, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 800px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+        }
+        
+        select {
+            background: var(--bg-dark);
+            color: var(--neon-primary);
+            border: 2px solid var(--neon-primary);
+            border-radius: 8px;
+            padding: 0.8rem 1.2rem;
+            font-size: 1rem;
+            margin: 1rem 0;
+            font-family: inherit;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300fff7'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.5rem;
+            padding-right: 3rem;
+            cursor: pointer;
+        }
+        
+        select:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--neon-primary);
+        }
+        
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 1.5rem auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 255, 247, 0.3);
+        }
+        
+        video, canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+            border: 3px solid var(--neon-secondary);
+            border-radius: 12px;
+        }
+        
+        canvas {
+            display: none;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+        
+        button {
+            background: transparent;
+            border: 2px solid var(--neon-primary);
+            color: var(--neon-primary);
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            letter-spacing: 1px;
+            min-width: 200px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 247, 0.3), transparent);
+            transition: 0.5s;
+        }
+        
+        button:hover {
+            background: var(--neon-primary);
+            color: var(--bg-dark);
+            box-shadow: 0 0 15px var(--neon-primary);
+            transform: translateY(-3px);
+        }
+        
+        button:hover::before {
+            left: 100%;
+        }
+        
+        #result {
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 8px;
+            background: rgba(0, 255, 247, 0.1);
+            border: 1px solid var(--neon-primary);
+            max-width: 100%;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .camera-container {
+                padding: 1.5rem;
+            }
+            
+            video, canvas {
+                max-height: 50vh;
+            }
+            
+            button {
+                min-width: 160px;
+                padding: 0.7rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="camera-container">
+        <h1>Live Camera Feed</h1>
+        <select id="cameraSelect"></select>
+        
+        <div class="video-wrapper">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas"></canvas>
+        </div>
+        
+        <div class="button-group">
+            <button onclick="captureAndSend()">Capture & Predict</button>
+            <button onclick="window.location.href='/menu'">Back</button>
+        </div>
+        
+        <div id="result"></div>
+    </div>
+    <script>
+        const video = document.getElementById('video');
+        const select = document.getElementById('cameraSelect');
+        const result = document.getElementById('result');
+
+        function showError(msg) {
+            result.style.display = 'block';
+            result.textContent = msg;
+        }
+
+        function listCameras() {
+            navigator.mediaDevices.enumerateDevices()
+                .then(devices => {
+                    if (!devices || !Array.isArray(devices)) {
+                        showError('Could not access device list. Please check browser permissions and extensions.');
+                        return;
+                    }
+                    const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                    select.innerHTML = '';
+                    if (videoDevices.length === 0) {
+                        showError('No camera devices found.');
+                        return;
+                    }
+                    videoDevices.forEach((device, index) => {
+                        const option = document.createElement('option');
+                        option.value = device.deviceId;
+                        option.text = device.label || `Camera ${index + 1}`;
+                        select.appendChild(option);
+                    });
+                    startStream(videoDevices[0].deviceId);
+                })
+                .catch(err => {
+                    showError('Could not enumerate devices: ' + err.message);
+                });
+        }
+
+        select.addEventListener('change', () => {
+            startStream(select.value);
+        });
+
+        function startStream(deviceId) {
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+            navigator.mediaDevices.getUserMedia({
+                video: { deviceId: { exact: deviceId } }
+            }).then(stream => {
+                video.srcObject = stream;
+                result.style.display = 'none';
+            }).catch(err => {
+                if (err.name === 'NotAllowedError') {
+                    showError('Camera access denied. Please allow camera permissions.');
+                } else if (err.name === 'NotFoundError') {
+                    showError('No camera found. Please connect a camera.');
+                } else {
+                    showError('Error accessing camera: ' + err.message);
+                }
+            });
+        }
+
+        // Only run on HTTPS or localhost
+        if (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+            listCameras();
+        } else {
+            showError('Camera access requires HTTPS or localhost.');
+        }
+
+        function captureAndSend() {
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/jpeg');
+
+            result.style.display = 'block';
+            result.textContent = 'Processing...';
+
+            fetch('/predict_webcam', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: imageData })
+            })
+            .then(res => res.json())
+            .then(data => {
+                result.innerHTML = `<strong>Prediction:</strong> ${data.label}`;
+            })
+            .catch(err => {
+                showError('Prediction failed. Please try again.');
+            });
+        }
+    </script>
+</body>
+</html>
