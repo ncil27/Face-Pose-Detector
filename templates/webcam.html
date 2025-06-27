@@ -1,24 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Face Pose Detector - Webcam</title>
+  <title>Camera Mode - Face Pose Detector</title>
   <style>
-    body { text-align: center; background-color: #f5f5f5; }
-    canvas, video { border-radius: 12px; margin-top: 20px; }
+    body { text-align: center; background-color: #fff; }
+    video { border-radius: 12px; margin-top: 20px; }
   </style>
 </head>
 <body>
-  <h2>🧠 Face Pose Detection (Webcam)</h2>
+  <h2>Live Face Pose Detection</h2>
   <video id="video" width="480" height="360" autoplay></video>
-  <canvas id="canvas" width="480" height="360" style="display: none;"></canvas>
-  <p id="result" style="font-size: 1.2em; font-weight: bold;"></p>
+  <canvas id="canvas" width="480" height="360" style="display:none;"></canvas>
+  <p id="result" style="font-size: 1.2em; font-weight: bold; margin-top: 20px;"></p>
 
   <script>
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const result = document.getElementById('result');
 
-    // Aktifkan webcam
     navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
       video.srcObject = stream;
     });
@@ -39,7 +38,7 @@
       }, 'image/jpeg');
     }
 
-    setInterval(sendFrame, 1500); // Kirim frame setiap 1.5 detik
+    setInterval(sendFrame, 1500);
   </script>
 </body>
 </html>
