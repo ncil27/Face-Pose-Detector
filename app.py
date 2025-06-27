@@ -4,6 +4,9 @@ import mediapipe as mp
 from werkzeug.utils import secure_filename
 from PIL import Image
 
+import base64
+from io import BytesIO
+
 app = Flask(__name__)
 
 # Load model
@@ -72,6 +75,23 @@ def predict():
     label = le.inverse_transform(prediction)[0]
 
     return jsonify({'label': label})
+
+
+@app.route('/predict_webcam', methods=['POST'])
+def predict_webcam():
+    data = request.get_json()
+    img_data = data['image'].split(",")[1]
+    img_bytes = base64.b64decode(img_data)
+    img = Image.open(BytesIO(img_bytes)).convert('L')  # Convert ke grayscale
+
+    img = img.resize((64, 60))  # Ukuran sesuai training
+    img_np = np.array(img).flatten().reshape(1, -1) / 255.0
+    img_pca = pca.transform(img_np)
+    prediction = model.predict(img_pca)
+    label = le.inverse_transform(prediction)[0]
+
+    return jsonify({'label': label})
+
 
 if __name__ == '__main__':
     app.run(debug=True)

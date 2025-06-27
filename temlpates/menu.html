@@ -1,0 +1,48 @@
+<!DOCTYPE html>    
+</body>
+</html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Menu - Face Pose Detector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #0d0d0d;
+            color: #ff00d4;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+        }
+        button {
+            margin: 10px;
+            background-color: transparent;
+            border: 2px solid #ff00d4;
+            color: #ff00d4;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            background-color: #ff00d4;
+            color: #0d0d0d;
+        }
+    </style>
+</head>
+<body>
+    <h1>Select Input Method</h1>
+    <button onclick="window.location.href='/webcam'">Open Camera</button>
+    <button onclick="window.location.href='/upload'">Upload File</button>
+    <button onclick="window.location.href='/'">Back</button>
+</body>
+</html>

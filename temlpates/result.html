@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Face Pose Detection Result</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .result-box { margin: 20px 0; text-align: center; }
+        .result-image { max-width: 100%; height: auto; }
+        .pose-result { font-size: 24px; margin: 20px 0; }
+        .btn { background: #4CAF50; color: white; padding: 10px 20px; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Face Pose Detection Result</h1>
+    
+    <div class="result-box">
+        <h3>Input Image:</h3>
+        <img class="result-image" src="{{ url_for('static', filename='uploads/' + input_image) }}" alt="Input Image">
+        
+        <div class="pose-result">
+            Detected Pose: <strong>{{ pose_result }}</strong>
+        </div>
+        
+        <a href="/" class="btn">Try Another Image</a>
+    </div>
+</body>
+</html>

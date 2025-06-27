@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Image</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #1a1a1a;
+            color: #00fff7;
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            padding-top: 50px;
+        }
+
+        input,
+        button {
+            margin: 10px;
+            padding: 10px;
+            border: 2px solid #00fff7;
+            background: transparent;
+            color: #00fff7;
+            font-family: inherit;
+        }
+
+        button:hover {
+            background: #00fff7;
+            color: black;
+        }
+
+        img {
+            margin-top: 20px;
+            max-width: 300px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Upload an Image for Prediction</h2>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" id="imageInput" name="image" accept="image/*" class="form-control w-50 mx-auto mt-4"
+            required>
+        <img id="preview" src="" alt="Image Preview" style="display: none;">
+        <button type="submit" class="btn btn-primary mt-3">Predict</button>
+    </form>
+    <div id="result" class="alert alert-info mt-4 w-50 mx-auto" style="display: block; margin-left: auto;"></div>
+
+    <br>
+    <button onclick="window.location.href='/menu'">Back</button>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const imageInput = document.getElementById('imageInput');
+        const preview = document.getElementById('preview');
+        const result = document.getElementById('result');
+
+        imageInput.onchange = () => {
+            const file = imageInput.files[0];
+            if (file) {
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = 'block';
+            }
+        };
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            result.style.display = 'block';
+            result.innerText = 'Prediction: ' + (data.label || data.error);
+        };
+    </script>
+</body>
+
+</html>
