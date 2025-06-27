@@ -1,16 +1,8 @@
-from flask import Flask, render_template, request, jsonify,  redirect, url_for
+from flask import Flask, render_template, request, jsonify
 import os, cv2, joblib, numpy as np
 import mediapipe as mp
 from werkzeug.utils import secure_filename
 from PIL import Image
-import base64
-# from flask import Flask, render_template, request
-# from PIL import Image
-from io import BytesIO
-# from flask import Flask, render_template,
-import subprocess
-# import numpy as np
-# import cv2
 
 import base64
 from io import BytesIO
@@ -37,9 +29,9 @@ def index():
 def menu():
     return render_template('menu.html')
 
-@app.route('/webcam_capture')
-def webcam_capture():
-    return render_template('webcam_capture.html')
+@app.route('/webcam')
+def webcam():
+    return render_template('webcam.html')
 
 @app.route('/upload')
 def upload():
@@ -99,12 +91,6 @@ def predict_webcam():
     label = le.inverse_transform(prediction)[0]
 
     return jsonify({'label': label})
-
-@app.route('/open_camera')
-def open_camera():
-    # Jalankan script Python yang real-time
-    subprocess.Popen(["python", "pose_predictor.py"])
-    return redirect(url_for('menu'))  # Kembali ke menu setelah dijalankan
 
 
 if __name__ == '__main__':
