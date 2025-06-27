@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Face Pose Detector - Webcam</title>
+  <style>
+    body { text-align: center; background-color: #f5f5f5; }
+    canvas, video { border-radius: 12px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h2>🧠 Face Pose Detection (Webcam)</h2>
+  <video id="video" width="480" height="360" autoplay></video>
+  <canvas id="canvas" width="480" height="360" style="display: none;"></canvas>
+  <p id="result" style="font-size: 1.2em; font-weight: bold;"></p>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const result = document.getElementById('result');
+
+    // Aktifkan webcam
+    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+      video.srcObject = stream;
+    });
+
+    function sendFrame() {
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(blob => {
+        const formData = new FormData();
+        formData.append('image', blob, 'webcam.jpg');
+        fetch('/predict', {
+          method: 'POST',
+          body: formData
+        }).then(res => res.json())
+          .then(data => {
+            result.textContent = 'Prediction: ' + (data.label || data.error);
+          });
+      }, 'image/jpeg');
+    }
+
+    setInterval(sendFrame, 1500); // Kirim frame setiap 1.5 detik
+  </script>
+</body>
+</html>
